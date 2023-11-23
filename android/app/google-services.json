@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "91001722490",
+    "project_id": "chatgptrecipegenerator",
+    "storage_bucket": "chatgptrecipegenerator.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:91001722490:android:367c9dbf671208b8874dc3",
+        "android_client_info": {
+          "package_name": "com.example.g14"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDkU8KM9ZuqAxIzr7gn5-FLmhYQfN-E8eg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
