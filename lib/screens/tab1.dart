@@ -3,10 +3,8 @@ import 'package:youtube_api/youtube_api.dart';
 import 'package:g14/screens/recipegenerator.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-import 'package:video_player/video_player.dart';
-
-import 'package:g14/screens/recipegenerator2.dart';
-
+import 'package:hyper_effects/hyper_effects.dart';
+import 'package:g14/widget/videocard.dart' as video_card;
 
 class Tab1 extends StatefulWidget {
   @override
@@ -14,49 +12,62 @@ class Tab1 extends StatefulWidget {
 }
 
 class _Tab1State extends State<Tab1> {
-  static const String key = "AIzaSyAd6OIW60UHOBRO_10VhujI6FujyBQsTB4";
-
+  static const String key = "AIzaSyAd6OIW60UHOBRO_10VhujI6FujyBQsTB4"; // 実験用のAPIキー
   YoutubeAPI youtube = YoutubeAPI(key, maxResults: 20, type: 'video');
+  List<video_card.YouTubeVideo> videoResult = [];
+  bool _isLoading = false;
+  TextEditingController searchController = TextEditingController();
 
-  List<YouTubeVideo> videoResult = [];
-
-  String selectedQuery = "簡単レシピ"; // 初期値を簡単レシピに設定
-
-  bool _isLoading = true; //API呼び出し中trueにしておく
-
-  Future<void> callAPI() async {
+  Future<void> callAPI(String query) async {
     setState(() {
-      _isLoading = true; // API呼び出し開始時にtrueに設定
+      _isLoading = true;
     });
 
-    List<YouTubeVideo> videos = await youtube.search(
-      selectedQuery,
-      order: 'relevance',
-      videoDuration: 'any',
-      regionCode: 'JP',
+    var searchResults = await youtube.search(query, order: 'relevance', videoDuration: 'any', regionCode: 'JP');
+
+    // 各動画のIDを取得
+    List<String> videoIds = searchResults.map((video) => video.id).where((id) => id != null).cast<String>().toList();
+    // YouTube Data API v3を使用して各動画の詳細情報を取得
+    var videoDetailsResponse = await http.get(
+        Uri.parse('https://www.googleapis.com/youtube/v3/videos?part=snippet,contentDetails,statistics&id=${videoIds.join(',')}&key=${key}')
     );
 
-    // ここで字幕の有無を確認
-    List<YouTubeVideo> videosWithCaptions = [];
-    for (var video in videos) {
-      if (await checkForCaptions(video.id)) {
-        videosWithCaptions.add(video);
-      }
-    }
+    if (videoDetailsResponse.statusCode == 200) {
+      var videoDetailsData = json.decode(videoDetailsResponse.body);
+      List<video_card.YouTubeVideo> videosWithDetails = [];
 
-    // 字幕があるビデオだけをセット
-    setState(() {
-      videoResult = videosWithCaptions;
-      _isLoading = false;
-    });
+      for (var videoData in videoDetailsData['items']) {
+        // 必要な情報を取り出し
+        var newVideo = video_card.YouTubeVideo(
+          id: videoData['id'],
+          title: videoData['snippet']['title'],
+          thumbnailUrl: videoData['snippet']['thumbnails']['high']['url'],
+          channelTitle: videoData['snippet']['channelTitle'],
+          viewCount: int.parse(videoData['statistics']['viewCount']),
+          publishedAt: DateTime.parse(videoData['snippet']['publishedAt']),
+        );
+        videosWithDetails.add(newVideo);
+      }
+
+      setState(() {
+        videoResult = videosWithDetails;
+        _isLoading = false;
+      });
+    } else {
+      // エラー処理
+      setState(() {
+        _isLoading = false;
+      });
+    }
   }
+
+
 
   Future<bool> checkForCaptions(String? videoId) async {
     if (videoId == null) return false;
 
     final response = await http.post(
-      Uri.parse(
-          'https://asia-northeast1-dotted-crane-403823.cloudfunctions.net/youtube_subtitles'),
+      Uri.parse('https://asia-northeast1-dotted-crane-403823.cloudfunctions.net/youtube_subtitles'),
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
       },
@@ -65,29 +76,11 @@ class _Tab1State extends State<Tab1> {
 
     if (response.statusCode == 200) {
       var data = json.decode(response.body);
-      // Use a non-nullable string for the key
       return data['captions'][videoId] ?? false;
     } else {
       return false;
     }
   }
-
-  VideoPlayerController? _videoController;
-  bool _isVideoInitialized = false;
-
-  @override
-  void initState() {
-    super.initState();
-    callAPI();
-  }
-
-
-  @override
-  void dispose() {
-    _videoController?.dispose();
-    super.dispose();
-  }
-
 
   @override
   Widget build(BuildContext context) {
@@ -95,54 +88,37 @@ class _Tab1State extends State<Tab1> {
       children: [
         Column(
           children: [
-            DropdownButton<String>(
-              value: selectedQuery,
-              onChanged: (String? newValue) {
-                if (newValue != null) {
-                  setState(() {
-                    selectedQuery = newValue;
-                    _isLoading = true; // ローディング状態をtrueに設定
-                    callAPI(); // 新しいクエリでAPIを再呼び出し
-                  });
-                }
-              },
-              items: <DropdownMenuItem<String>>[
-                DropdownMenuItem<String>(
-                  value: "簡単レシピ",
-                  child: Text("簡単レシピ"),
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: TextField(
+                controller: searchController,
+                decoration: InputDecoration(
+                  labelText: 'YouTube検索',
+                  suffixIcon: IconButton(
+                    icon: Icon(Icons.search),
+                    onPressed: () {
+                      callAPI(searchController.text);
+                    },
+                  ),
                 ),
-                DropdownMenuItem<String>(
-                  value: "和食　レシピ",
-                  child: Text("和食"),
-                ),
-                DropdownMenuItem<String>(
-                  value: "洋食　レシピ",
-                  child: Text("洋食"),
-                ),
-              ],
+                onSubmitted: (value) {
+                  callAPI(value);
+                },
+              ),
             ),
             Expanded(
               child: ListView.builder(
                 itemCount: videoResult.length,
                 itemBuilder: (context, index) {
-                  return ListTile(
-                    leading: Image.network(
-                      videoResult[index].thumbnail.small.url ?? '',
-                      errorBuilder: (context, error, stackTrace) {
-                        return Icon(Icons.error); // エラー時はエラーアイコンを表示
-                      },
-                    ),
-                    title: Text(videoResult[index].title),
+                  return video_card.VideoCard(
+                    video: videoResult[index],
                     onTap: () {
                       String? selectedVideoId = videoResult[index].id;
                       if (selectedVideoId != null) {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) =>
-                                RecipeGenerator2(
-                                  videoId: selectedVideoId,
-                                ),
+                            builder: (context) => RecipeGenerator(videoId: selectedVideoId),
                           ),
                         );
                       }
@@ -154,8 +130,8 @@ class _Tab1State extends State<Tab1> {
           ],
         ),
         _isLoading
-            ? Center(child: Image.asset('assets/gif/road.gif')) // ロード中はGIFを表示
-            : SizedBox.shrink(), // ロード完了後は表示しない
+            ? Center(child: Image.asset('assets/gif/road.gif'))
+            : SizedBox.shrink(),
       ],
     );
   }

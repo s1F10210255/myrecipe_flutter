@@ -3,8 +3,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:g14/screens/tab1.dart';
 import 'package:g14/screens/tab2.dart';
 import 'package:g14/screens/tab4.dart';
-
-
+import 'package:g14/screens/tab5.dart';
+import 'package:custom_navigation_bar/custom_navigation_bar.dart';
 
 class HomeScreen extends StatefulWidget {
   @override
@@ -20,10 +20,8 @@ class _HomeScreenState extends State<HomeScreen> {
     Tab2(),  // 2つ目のタブの中身
     Center(child: Text('Tab 3')),  // 3つ目のタブの中身
     Tab4(),
-    Center(child: Text('Tab 5')),  // 3つ目のタブの中身
-
+    Tab5(),
   ];
-
 
   @override
   void initState() {
@@ -31,22 +29,20 @@ class _HomeScreenState extends State<HomeScreen> {
     _currentUser = FirebaseAuth.instance.currentUser;  // <-- 現在のユーザーを取得
   }
 
-
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Cock!!'),
-      actions: [
-        if (_currentUser != null)
-          Padding(
-            padding: EdgeInsets.symmetric(horizontal: 8.0),
-            child: Center(child: Text(_currentUser!.email ?? '')),
-          ),],),
-
+        actions: [
+          if (_currentUser != null)
+            Padding(
+              padding: EdgeInsets.symmetric(horizontal: 8.0),
+              child: Center(child: Text(_currentUser!.email ?? '')),
+            ),
+        ],
+      ),
       body: _pages[_currentIndex],  // 現在のタブインデックスに応じたページを表示
-      bottomNavigationBar: BottomNavigationBar(
+      bottomNavigationBar: CustomNavigationBar(
         currentIndex: _currentIndex,
         onTap: (index) {
           setState(() {
@@ -54,32 +50,25 @@ class _HomeScreenState extends State<HomeScreen> {
           });
         },
         items: [
-          BottomNavigationBarItem(
+          CustomNavigationBarItem(
             icon: Icon(Icons.home),
-            label: 'Tab 1',
-            backgroundColor: Colors.blue,
           ),
-          BottomNavigationBarItem(
+          CustomNavigationBarItem(
             icon: Icon(Icons.search),
-            label: 'Tab 2',
-            backgroundColor: Colors.yellow,
           ),
-          BottomNavigationBarItem(
+          CustomNavigationBarItem(
             icon: Icon(Icons.person),
-            label: 'Tab 3',
-            backgroundColor: Colors.red,
           ),
-          BottomNavigationBarItem(
+          CustomNavigationBarItem(
             icon: Icon(Icons.edit_calendar_outlined),
-            label: 'Tab 4',
-            backgroundColor: Colors.purple,
           ),
-          BottomNavigationBarItem(
+          CustomNavigationBarItem(
             icon: Icon(Icons.attachment),
-            label: 'Tab 5',
-            backgroundColor: Colors.green,
           ),
         ],
+        isFloating: true,  // <-- これを追加します
+        bubbleCurve: Curves.easeInOutCubic,  // <-- これを追加します
+        scaleCurve: Curves.decelerate,  // <-- これを追加します
       ),
     );
   }

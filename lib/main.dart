@@ -44,6 +44,8 @@ void main() async {
     options: DefaultFirebaseOptions.currentPlatform,
   );
 
+
+
   const app = MyApp();
   const scope = ProviderScope(child: app);
   runApp(scope);

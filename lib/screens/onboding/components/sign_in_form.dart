@@ -3,61 +3,81 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:rive/rive.dart';
 import 'package:g14/servise/service.dart';
-
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:go_router/go_router.dart';
 
 
 class SignInForm extends StatefulWidget {
-  const SignInForm({
-    super.key,
-  });
+  const SignInForm({super.key});
 
   @override
   State<SignInForm> createState() => _SignInFormState();
 }
 
 class _SignInFormState extends State<SignInForm> {
-  GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   bool isShowLoading = false;
   bool isShowConfetti = false;
+
+  String email = ''; // クラスのメンバ変数として追加
+  String password = ''; // クラスのメンバ変数として追加
 
   late SMITrigger check;
   late SMITrigger error;
   late SMITrigger reset;
-
   late SMITrigger confetti;
 
   StateMachineController getRiveController(Artboard artboard) {
-    StateMachineController? controller =
-    StateMachineController.fromArtboard(artboard, "State Machine 1");
-    artboard.addController(controller!);
-    return controller;
+    final controller =
+    StateMachineController.fromArtboard(artboard, 'State Machine 1');
+    if (controller != null) {
+      artboard.addController(controller);
+      return controller;
+    }
+    throw Exception('Failed to find the state machine controller.');
   }
 
-  void signIn(BuildContext context) {
-    setState(() {
-      isShowLoading = true;
-      isShowConfetti = true;
-    });
-    Future.delayed(Duration(seconds: 1), () {
-      if (_formKey.currentState!.validate()) {
-        // show success
+  void signIn(BuildContext context) async {
+    if (_formKey.currentState!.validate()) {
+      _formKey.currentState!.save(); // フォームの内容を保存
+
+      setState(() {
+        isShowLoading = true;
+      });
+
+      try {
+        // AuthService を使用してサインインします。
+        print("Trying to sign in with email: $email and password: $password");
+        final UserCredential userCredential =
+        await AuthService().signInWithEmailPassword(email, password);
+
+        print("Signed in successfully. Navigating to home...");
+        GoRouter.of(context).go('/home');
         check.fire();
         Future.delayed(Duration(seconds: 2), () {
           setState(() {
             isShowLoading = false;
+            isShowConfetti = true; // サインイン成功時のコンフェティ表示をトリガー
           });
-          confetti.fire();
+          confetti.fire(); // コンフェティアニメーションを起動
         });
-      } else {
+      } on FirebaseAuthException catch (e) {
+        print("Failed to sign in: ${e.code}, ${e.message}");
+
+        // サインイン中にエラーが発生した場合の処理をここに記述します。
         error.fire();
-        Future.delayed(Duration(seconds: 2), () {
-          setState(() {
-            isShowLoading = false;
-          });
+        setState(() {
+          isShowLoading = false;
         });
+        // ここでユーザーにエラーメッセージを表示するなどの処理を追加することができます。
       }
-    });
+    } else {
+      error.fire(); // バリデーションエラー時のアニメーション
+    }
   }
+
+
+
 
 
   @override
@@ -65,91 +85,80 @@ class _SignInFormState extends State<SignInForm> {
     return Stack(
       children: [
         Form(
-          key: _formKey,
-          child: Column(
+            key: _formKey,
+            child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Center(
-                  child: Container(
-                    width: 400, // 幅を設定
-                    child: Padding(
-                      padding: const EdgeInsets.only(top: 8.0, bottom: 16),
-                      child: TextFormField(
-                        validator: (value) {
-                          if (value!.isEmpty) {
-                            return "";
-                          }
-                          return null;
-                        },
-                        onSaved: (email) {},
-                        decoration: InputDecoration(
-                          hintText: 'Email',
-                          prefixIcon: Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                            child: SvgPicture.asset("assets/icons/email.svg"),
-                          ),
-                        ),
-                      ),
-                    ),
+                const Text(
+                  "Email",
+                  style: TextStyle(color: Colors.black54),
+                ),
+                Padding(
+                  padding: const EdgeInsets.only(top: 8.0, bottom: 16),
+                  child: TextFormField(
+                    validator: (value) {
+                      if (value!.isEmpty) {
+                        return "Please enter your email.";
+                      }
+                      return null;
+                    },
+                    onSaved: (value) {
+                      email = value!;
+                    },
+                    decoration: InputDecoration(
+                        prefixIcon: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                          child: SvgPicture.asset("assets/icons/email.svg"),
+                        )),
                   ),
                 ),
-
-                Center(
-                  child: Container(
-                    width: 400, // 幅を設定
-                    child: Padding(
-                      padding: const EdgeInsets.only(top: 8.0, bottom: 16),
-                      child: TextFormField(
-                        validator: (value) {
-                          if (value!.isEmpty) {
-                            return "";
-                          }
-                          return null;
-                        },
-                        onSaved: (password) {},
-                        obscureText: true,
-                        decoration: InputDecoration(
-                          hintText: 'Password',
-                          prefixIcon: Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                            child: SvgPicture.asset("assets/icons/password.svg"),
-                          ),
-                        ),
-                      ),
-                    ),
+                const Text(
+                  "Password",
+                  style: TextStyle(color: Colors.black54),
+                ),
+                Padding(
+                  padding: const EdgeInsets.only(top: 8.0, bottom: 16),
+                  child: TextFormField(
+                    validator: (value) {
+                      if (value!.isEmpty) {
+                        return "Please enter your password.";
+                      }
+                      return null;
+                    },
+                    onSaved: (value) {
+                      password = value!;
+                    },
+                    obscureText: true,
+                    decoration: InputDecoration(
+                        prefixIcon: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                          child: SvgPicture.asset("assets/icons/password.svg"),
+                        )),
                   ),
                 ),
-
-                Center(
-                  child: Padding(
-                    padding: const EdgeInsets.only(top: 8.0, bottom: 24),
-                    child: ElevatedButton.icon(
+                Padding(
+                  padding: const EdgeInsets.only(top: 8.0, bottom: 24),
+                  child: ElevatedButton.icon(
                       onPressed: () {
                         signIn(context);
                       },
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFFF77D8E),
-                        minimumSize: const Size(400, 56), // 幅を400に設定
-                        shape: const RoundedRectangleBorder(
-                          borderRadius: BorderRadius.only(
-                            topLeft: Radius.circular(25),
-                            topRight: Radius.circular(25),
-                            bottomRight: Radius.circular(25),
-                            bottomLeft: Radius.circular(25),
-                          ),
-                        ),
-                      ),
+                          backgroundColor: const Color(0xFFF77D8E),
+                          minimumSize: const Size(double.infinity, 56),
+                          shape: const RoundedRectangleBorder(
+                              borderRadius: BorderRadius.only(
+                                  topLeft: Radius.circular(10),
+                                  topRight: Radius.circular(25),
+                                  bottomRight: Radius.circular(25),
+                                  bottomLeft: Radius.circular(25)))),
                       icon: const Icon(
-                        Icons.login,
-                        color: Colors.white,
+                        CupertinoIcons.arrow_right,
+                        color: Color(0xFFFE0037),
                       ),
-                      label: const Text("Sign In"),
-                    ),
-                  ),
-                ),
-              ]
-          ),
-        ),
+                      label: const Text("Sign In")),
+                )
+              ],
+            )),
         isShowLoading
             ? CustomPositioned(
             child: RiveAnimation.asset(

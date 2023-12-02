@@ -33,10 +33,12 @@ Future<Object?> customSigninDialog(BuildContext context,
       },
       pageBuilder: (context, _, __) => Center(
         child: Container(
-          height: 650,
+          height: 620,
+          margin: const EdgeInsets.symmetric(horizontal: 16),
+          padding: const EdgeInsets.symmetric(vertical: 32, horizontal: 16),
           decoration: BoxDecoration(
-            color: Colors.white.withOpacity(0.95),
-          ),
+              color: Colors.white.withOpacity(0.95),
+              borderRadius: const BorderRadius.all(Radius.circular(40))),
           child: Scaffold(
             backgroundColor: Colors.transparent,
             resizeToAvoidBottomInset:
@@ -47,11 +49,10 @@ Future<Object?> customSigninDialog(BuildContext context,
                 Column(children: [
                   const Text(
                     "Sign In",
-                    style: TextStyle(fontSize: 34,fontFamily: "Poppins", ),
+                    style: TextStyle(fontSize: 34, fontFamily: "Poppins"),
                   ),
-
                   const Padding(
-                    padding: EdgeInsets.symmetric(vertical: 32),
+                    padding: EdgeInsets.symmetric(vertical: 16),
                     child: Text(
                       "Access to 240+ hours of content. Learn design and code, by builder real apps with Flutter and Swift.",
                       textAlign: TextAlign.center,
@@ -76,7 +77,7 @@ Future<Object?> customSigninDialog(BuildContext context,
                     ],
                   ),
                   const Padding(
-                    padding: EdgeInsets.symmetric(vertical: 40.0),
+                    padding: EdgeInsets.symmetric(vertical: 20.0),
                     child: Text("Sign up with Email, Apple or Google",
                         style: TextStyle(color: Colors.black54)),
                   ),
@@ -85,7 +86,9 @@ Future<Object?> customSigninDialog(BuildContext context,
                     children: [
                       IconButton(
                           padding: EdgeInsets.zero,
-                          onPressed: () {},
+                          onPressed: () {
+                            GoRouter.of(context).go('/sign-up');
+                          },
                           icon: SvgPicture.asset(
                             "assets/icons/email_box.svg",
                             height: 64,
