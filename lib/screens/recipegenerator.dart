@@ -5,7 +5,9 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 import 'package:fan_floating_menu/fan_floating_menu.dart';
-
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:intl/intl.dart';
+import 'package:g14/widget/AdWidget.dart';
 
 
 class RecipeGenerator extends StatefulWidget {
@@ -23,6 +25,11 @@ class _RecipeGeneratorState extends State<RecipeGenerator> {
   final TextEditingController _questionController = TextEditingController();
   bool _isLoading = false;
   late YoutubePlayerController _controller;
+  bool _isMenuOpen = false;
+
+  late AdInterstitialWidget adInterstitialWidget;
+
+
 
   String? getCurrentUserUID() {
     return _auth.currentUser?.uid;
@@ -31,6 +38,7 @@ class _RecipeGeneratorState extends State<RecipeGenerator> {
   @override
   void initState() {
     super.initState();
+    adInterstitialWidget = AdInterstitialWidget();
     _controller = YoutubePlayerController(
       initialVideoId: widget.videoId,
       flags: YoutubePlayerFlags(
@@ -89,6 +97,44 @@ class _RecipeGeneratorState extends State<RecipeGenerator> {
     }
   }
 
+  Future<void> likeVideo(String userId, String videoId) async {
+    FirebaseFirestore.instance
+        .collection('users')
+        .doc(userId)
+        .collection('likevideo')
+        .doc(videoId) // ビデオIDをドキュメントIDとして使用
+        .set({
+      'likedAt': FieldValue.serverTimestamp(), // 現在のタイムスタンプを保存
+      'videoId': videoId // ビデオIDも保存
+    })
+        .then((value) => print("Video Liked"))
+        .catchError((error) => print("Failed to like video: $error"));
+  }
+
+  Future<void> saveVideoToCalendar(String userId, String videoId) async {
+    String formattedDate = DateFormat('yyyy-MM-dd').format(DateTime.now()); // 現在の日付をフォーマット
+    DocumentReference docRef = FirebaseFirestore.instance
+        .collection('users')
+        .doc(userId)
+        .collection('Calendar_video')
+        .doc(formattedDate); // フォーマットされた日付をドキュメントIDとして使用
+
+    FirebaseFirestore.instance.runTransaction((transaction) async {
+      DocumentSnapshot snapshot = await transaction.get(docRef);
+
+      if (!snapshot.exists) {
+        transaction.set(docRef, {'videoIds': [videoId]});
+      } else {
+        Map<String, dynamic> data = snapshot.data() as Map<String, dynamic> ?? {};
+        List<dynamic> videoIds = data.containsKey('videoIds') ? List.from(data['videoIds']) : [];
+        videoIds.add(videoId);
+        transaction.update(docRef, {'videoIds': videoIds});
+      }
+    }).then((value) => print("Video Saved to Calendar"))
+        .catchError((error) => print("Failed to save video: $error"));
+  }
+
+
   Future<void> _interactWithChatGPT(String userId, String videoId,
       String userQuestion) async {
     setState(() {
@@ -107,6 +153,7 @@ class _RecipeGeneratorState extends State<RecipeGenerator> {
     );
 
     if (response.statusCode == 200) {
+      adInterstitialWidget.showAd();
       final responseData = json.decode(response.body);
       _responseText = responseData['choices'][0]['message']['content'];
       _questionController.clear();
@@ -144,39 +191,49 @@ class _RecipeGeneratorState extends State<RecipeGenerator> {
               children: [
 
                 player,
-                // プレイヤーの下に続くウィジェット
+                AdInterstitialWidget(),
                 SizedBox(height: 20),
                 _isLoading
                     ? Expanded(
                     child: Center(child: CircularProgressIndicator()))
                     : Expanded(
                     child: SingleChildScrollView(child: Text(_responseText))),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.end, // これで右寄りに配置されます
-                  children: [
-                    Container(
-                      width: MediaQuery
-                          .of(context)
-                          .size
-                          .width * 0.8, // 画面幅の50%のサイズに設定
-                      padding: EdgeInsets.symmetric(
-                          horizontal: 20),
-                      child: TextField(
-                        controller: _questionController,
-                        decoration: InputDecoration(
-                          labelText: '料理の鉄人に質問',
-                          border: OutlineInputBorder(),
+
+
+
+                Padding( // 追加: Rowの上に余白を追加するためのPadding
+                  padding: EdgeInsets.only(bottom: 40.0),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      Container(
+                        width: MediaQuery.of(context).size.width * 0.8,
+                        padding: EdgeInsets.symmetric(horizontal: 20),
+                        child: TextField(
+                          controller: _questionController,
+                          decoration: InputDecoration(
+                            labelText: '質問してみよう',
+                            border: OutlineInputBorder(),
+                            suffixIcon: IconButton(
+                              icon: Icon(Icons.send),
+                              onPressed: () {
+                                if (_questionController.text.isNotEmpty) {
+                                  _interactWithChatGPT(getCurrentUserUID() ?? "", widget.videoId, _questionController.text);
+                                  _questionController.clear();
+                                }
+                              },
+                            ),
+                          ),
+                          onSubmitted: (value) {
+                            if (value.isNotEmpty) {
+                              _interactWithChatGPT(getCurrentUserUID() ?? "", widget.videoId, value);
+                              _questionController.clear();
+                            }
+                          },
                         ),
                       ),
-                    ),
-                  ],
-                ),
-                ElevatedButton(
-                  onPressed: () =>
-                      _interactWithChatGPT(
-                          getCurrentUserUID() ?? "", widget.videoId,
-                          _questionController.text),
-                  child: Text('質問を送信'),
+                    ],
+                  ),
                 ),
               ],
             ),
@@ -188,37 +245,35 @@ class _RecipeGeneratorState extends State<RecipeGenerator> {
             child: FanFloatingMenu(
               menuItems: [
                 FanMenuItem(
-                    onTap: () {
-                      // ここにアクションを追加
-                    },
-                    icon: Icons.edit_rounded,
-                    title: 'テキストを編集'
+                  onTap: () {
+                    String? userId = getCurrentUserUID();
+                    if (userId != null) {
+                      likeVideo(userId, widget.videoId);
+                    }
+                  },
+                  icon: Icons.favorite, // いいねアイコンに変更
+                  title: 'いいねする',
                 ),
                 FanMenuItem(
-                    onTap: () {
-                      // ここにアクションを追加
-                    },
-                    icon: Icons.save_rounded,
-                    title: 'ノートを保存'
+                  onTap: () {
+                    String? userId = getCurrentUserUID();
+                    if (userId != null) {
+                      saveVideoToCalendar(userId, widget.videoId);
+                    }
+                  },
+                  icon: Icons.calendar_today, // カレンダーアイコンに変更
+                  title: 'カレンダーに保存',
                 ),
-                FanMenuItem(
-                    onTap: () {
-                      // ここにアクションを追加
-                    },
-                    icon: Icons.send_rounded,
-                    title: '画像を送信'
-                ),
+
               ],
               fanMenuDirection: FanMenuDirection.ltr,
               expandItemsCurve: Curves.easeInOutBack,
               toggleButtonWidget: null,
-              // または好きなウィジェット
               toggleButtonIconColor: Colors.white,
-              toggleButtonColor: Colors.pink,
+              toggleButtonColor: Colors.green,
             ),
           ),
-          floatingActionButtonLocation: FloatingActionButtonLocation
-              .endFloat, // FABの位置を右側に設定
+          floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
         );
       },
     );

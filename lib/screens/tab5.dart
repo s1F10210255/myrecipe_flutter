@@ -8,6 +8,9 @@ import 'package:g14/screens/edit_name.dart';
 import 'package:g14/screens/edit_phone.dart';
 import 'package:g14/widget/display_image_widget.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:g14/screens/LikeVideo.dart';
+import 'package:g14/widget/AdWidget_tab2.dart';
+
 
 class Tab5 extends StatefulWidget {
   @override
@@ -93,6 +96,19 @@ class _Tab5State extends State<Tab5> {
     }
   }
 
+  Widget buildLikedVideosButton() {
+    return ListTile(
+      title: Text('いいねした動画'),
+      trailing: Icon(Icons.keyboard_arrow_right),
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => LikedVideosPage()),
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     if (_isLoading) {
@@ -132,8 +148,11 @@ class _Tab5State extends State<Tab5> {
             buildUserInfoDisplay('Name', '${_profileData['name']}', EditNameFormPage()),
             buildUserInfoDisplay('Phone', '${_profileData['phone']}', EditPhoneFormPage()),
             buildUserInfoDisplay('Email', '${_profileData['email']}', EditEmailFormPage()),
-            buildAbout('${_profileData['about']}'),
+            buildLikedVideosButton(), // 「いいねした動画」ボタンを追加
+
           ],
+
+
         ),
       ),
     );

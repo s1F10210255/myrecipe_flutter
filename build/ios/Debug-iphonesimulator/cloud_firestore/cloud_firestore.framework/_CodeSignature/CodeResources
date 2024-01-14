@@ -14,7 +14,7 @@
 		</data>
 		<key>Headers/FirestoreMessages.g.h</key>
 		<data>
-		c1hWlkWLT8fQpd1t5tXjpQ5rgDw=
+		7uVzsKOCfczpNzsLq23mJkUYDIA=
 		</data>
 		<key>Headers/cloud_firestore-umbrella.h</key>
 		<data>
@@ -22,7 +22,7 @@
 		</data>
 		<key>Info.plist</key>
 		<data>
-		lRr9Mr1MsUfsZfEL3FUuLjIp9BU=
+		U4IMPoTdqYp0uBKiKjFdw28RRyc=
 		</data>
 		<key>Modules/module.modulemap</key>
 		<data>
@@ -97,11 +97,11 @@
 		<dict>
 			<key>hash</key>
 			<data>
-			c1hWlkWLT8fQpd1t5tXjpQ5rgDw=
+			7uVzsKOCfczpNzsLq23mJkUYDIA=
 			</data>
 			<key>hash2</key>
 			<data>
-			uzZiwDb9QM00B4ZUpB2bw7FDM6kcj3t2zwQILrjt4qA=
+			rVwsPcvDMxA9tlTunRYuDC3WFmT3bK4gnJ2XSiRS6E4=
 			</data>
 		</dict>
 		<key>Headers/cloud_firestore-umbrella.h</key>

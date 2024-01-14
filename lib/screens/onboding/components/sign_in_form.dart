@@ -1,10 +1,10 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/svg.dart';
 import 'package:rive/rive.dart';
 import 'package:g14/servise/service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:go_router/go_router.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter/cupertino.dart';
 
 
 class SignInForm extends StatefulWidget {
@@ -19,8 +19,8 @@ class _SignInFormState extends State<SignInForm> {
   bool isShowLoading = false;
   bool isShowConfetti = false;
 
-  String email = ''; // クラスのメンバ変数として追加
-  String password = ''; // クラスのメンバ変数として追加
+  String email = '';
+  String password = '';
 
   late SMITrigger check;
   late SMITrigger error;
@@ -28,8 +28,7 @@ class _SignInFormState extends State<SignInForm> {
   late SMITrigger confetti;
 
   StateMachineController getRiveController(Artboard artboard) {
-    final controller =
-    StateMachineController.fromArtboard(artboard, 'State Machine 1');
+    final controller = StateMachineController.fromArtboard(artboard, 'State Machine 1');
     if (controller != null) {
       artboard.addController(controller);
       return controller;
@@ -39,52 +38,72 @@ class _SignInFormState extends State<SignInForm> {
 
   void signIn(BuildContext context) async {
     if (_formKey.currentState!.validate()) {
-      _formKey.currentState!.save(); // フォームの内容を保存
+      _formKey.currentState!.save();
 
       setState(() {
         isShowLoading = true;
       });
 
       try {
-        // AuthService を使用してサインインします。
-        print("Trying to sign in with email: $email and password: $password");
-        final UserCredential userCredential =
-        await AuthService().signInWithEmailPassword(email, password);
+        final UserCredential userCredential = await AuthService().signInWithEmailPassword(email, password);
 
-        print("Signed in successfully. Navigating to home...");
         GoRouter.of(context).go('/home');
         check.fire();
         Future.delayed(Duration(seconds: 2), () {
           setState(() {
             isShowLoading = false;
-            isShowConfetti = true; // サインイン成功時のコンフェティ表示をトリガー
+            isShowConfetti = true;
           });
-          confetti.fire(); // コンフェティアニメーションを起動
+          confetti.fire();
         });
       } on FirebaseAuthException catch (e) {
-        print("Failed to sign in: ${e.code}, ${e.message}");
-
-        // サインイン中にエラーが発生した場合の処理をここに記述します。
         error.fire();
         setState(() {
           isShowLoading = false;
         });
-        // ここでユーザーにエラーメッセージを表示するなどの処理を追加することができます。
       }
     } else {
-      error.fire(); // バリデーションエラー時のアニメーション
+      error.fire();
     }
   }
 
+  @override
+  void initState() {
+    super.initState();
+    _loadRiveFile('assets/RiveAssets/check.riv');
+    _loadRiveFile('assets/RiveAssets/confetti.riv');
+  }
 
+  void _loadRiveFile(String riveFileName) async {
+    final data = await rootBundle.load(riveFileName);
+    final file = RiveFile.import(data);
 
+    final artboard = file.mainArtboard;
+    var controller = getRiveController(artboard);
+
+    if (riveFileName.endsWith('check.riv')) {
+      var input = controller.findInput('check');
+      if (input is SMITrigger) {
+        check = input;
+      }
+    } else if (riveFileName.endsWith('confetti.riv')) {
+      var input = controller.findInput('confetti');
+      if (input is SMITrigger) {
+        confetti = input;
+      }
+    }
+
+    artboard.addController(controller);
+    setState(() {});
+  }
 
 
   @override
   Widget build(BuildContext context) {
-    return Stack(
-      children: [
-        Form(
+    return SingleChildScrollView(
+      child: Stack(
+        children: [
+          Form(
             key: _formKey,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -105,11 +124,9 @@ class _SignInFormState extends State<SignInForm> {
                     onSaved: (value) {
                       email = value!;
                     },
-                    decoration: InputDecoration(
-                        prefixIcon: Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                          child: SvgPicture.asset("assets/icons/email.svg"),
-                        )),
+                    decoration: const InputDecoration(
+                      prefixIcon: Icon(Icons.email),
+                    ),
                   ),
                 ),
                 const Text(
@@ -129,65 +146,58 @@ class _SignInFormState extends State<SignInForm> {
                       password = value!;
                     },
                     obscureText: true,
-                    decoration: InputDecoration(
-                        prefixIcon: Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                          child: SvgPicture.asset("assets/icons/password.svg"),
-                        )),
+                    decoration: const InputDecoration(
+                      prefixIcon: Icon(Icons.vpn_key),
+                    ),
                   ),
                 ),
                 Padding(
                   padding: const EdgeInsets.only(top: 8.0, bottom: 24),
                   child: ElevatedButton.icon(
-                      onPressed: () {
-                        signIn(context);
-                      },
-                      style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFFF77D8E),
-                          minimumSize: const Size(double.infinity, 56),
-                          shape: const RoundedRectangleBorder(
-                              borderRadius: BorderRadius.only(
-                                  topLeft: Radius.circular(10),
-                                  topRight: Radius.circular(25),
-                                  bottomRight: Radius.circular(25),
-                                  bottomLeft: Radius.circular(25)))),
-                      icon: const Icon(
-                        CupertinoIcons.arrow_right,
-                        color: Color(0xFFFE0037),
+                    onPressed: () {
+                      signIn(context);
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF45FF00),
+                      minimumSize: const Size(double.infinity, 56),
+                      shape: const RoundedRectangleBorder(
+                        borderRadius: BorderRadius.only(
+                          topLeft: Radius.circular(10),
+                          topRight: Radius.circular(25),
+                          bottomRight: Radius.circular(25),
+                          bottomLeft: Radius.circular(25),
+                        ),
                       ),
-                      label: const Text("Sign In")),
+                    ),
+                    icon: const Icon(
+                      CupertinoIcons.arrow_right,
+                      color: Color(0xFFFE0037),
+                    ),
+                    label: const Text("Sign In"),
+                  ),
                 )
               ],
-            )),
-        isShowLoading
-            ? CustomPositioned(
-            child: RiveAnimation.asset(
-              "assets/RiveAssets/check.riv",
-              onInit: (artboard) {
-                StateMachineController controller =
-                getRiveController(artboard);
-                check = controller.findSMI("Check") as SMITrigger;
-                error = controller.findSMI("Error") as SMITrigger;
-                reset = controller.findSMI("Reset") as SMITrigger;
-              },
-            ))
-            : const SizedBox(),
-        isShowConfetti
-            ? CustomPositioned(
-            child: Transform.scale(
-              scale: 6,
+            ),
+          ),
+          if (isShowLoading)
+            CustomPositioned(
               child: RiveAnimation.asset(
-                "assets/RiveAssets/confetti.riv",
-                onInit: (artboard) {
-                  StateMachineController controller =
-                  getRiveController(artboard);
-                  confetti =
-                  controller.findSMI("Trigger explosion") as SMITrigger;
-                },
+                "assets/RiveAssets/check.riv",
+                fit: BoxFit.contain,
               ),
-            ))
-            : const SizedBox()
-      ],
+            ),
+          if (isShowConfetti)
+            CustomPositioned(
+              child: Transform.scale(
+                scale: 6,
+                child: RiveAnimation.asset(
+                  "assets/RiveAssets/confetti.riv",
+                  fit: BoxFit.contain,
+                ),
+              ),
+            ),
+        ],
+      ),
     );
   }
 }

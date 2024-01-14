@@ -3,6 +3,10 @@ import 'package:flutter_svg/svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:g14/screens/onboding/components/sign_in_form.dart';
 import 'package:g14/servise/service.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/foundation.dart';
+import 'package:g14/screens/onboding/components/twitter_sign_in.dart';
+import 'package:twitter_login/twitter_login.dart';
 
 
 void signInWithGoogle(BuildContext context) async {
@@ -15,6 +19,37 @@ void signInWithGoogle(BuildContext context) async {
     print("Error signing in with Google: $error");
   }
 }
+
+
+Future<void> signInWithTwitter(BuildContext context) async {
+  final twitterLogin = TwitterLogin(
+    apiKey: 'C0I0iyFdxAR59FXxKQGUKPIkC',
+    apiSecretKey: 'G5chGLxkt4wv8kbPC4HonMMx51A9FUlwwOfe7YnzhD7mqCCMNU',
+    redirectURI: 'https://chatgptrecipegenerator.firebaseapp.com/__/auth/handler',
+  );
+
+  final authResult = await twitterLogin.login();
+
+  switch (authResult.status) {
+    case TwitterLoginStatus.loggedIn:
+    // ユーザーが正常にログインした場合の処理
+      print('Logged in! Username: ${authResult.user!.email}');
+      break;
+    case TwitterLoginStatus.cancelledByUser:
+    // ユーザーがログインをキャンセルした場合の処理
+      print('Login cancelled by user.');
+      break;
+    case TwitterLoginStatus.error:
+    // エラーが発生した場合の処理
+      print('Login error: ${authResult.errorMessage}');
+      break;
+    default:
+    // その他のケース
+      break;
+
+  }
+}
+
 
 
 Future<Object?> customSigninDialog(BuildContext context,
@@ -51,13 +86,7 @@ Future<Object?> customSigninDialog(BuildContext context,
                     "Sign In",
                     style: TextStyle(fontSize: 34, fontFamily: "Poppins"),
                   ),
-                  const Padding(
-                    padding: EdgeInsets.symmetric(vertical: 16),
-                    child: Text(
-                      "Access to 240+ hours of content. Learn design and code, by builder real apps with Flutter and Swift.",
-                      textAlign: TextAlign.center,
-                    ),
-                  ),
+
                   const SignInForm(),
                   const Row(
                     children: [
@@ -78,7 +107,7 @@ Future<Object?> customSigninDialog(BuildContext context,
                   ),
                   const Padding(
                     padding: EdgeInsets.symmetric(vertical: 20.0),
-                    child: Text("Sign up with Email, Apple or Google",
+                    child: Text("Sign up with Email, X or Google",
                         style: TextStyle(color: Colors.black54)),
                   ),
                   Row(
@@ -96,17 +125,22 @@ Future<Object?> customSigninDialog(BuildContext context,
                           )),
                       IconButton(
                           padding: EdgeInsets.zero,
-                          onPressed: () => signInWithGoogle(context),
+
+                          onPressed: () {
+                            print('Twitter login button tapped'); // ボタンタップのデバッグ情報
+                            signInWithTwitter(context);
+                          },
+
                           icon: SvgPicture.asset(
-                            "assets/icons/apple_box.svg",
-                            height: 64,
-                            width: 64,
+                            "assets/icons/X_logo_2023.svg",
+                            height: 40,
+                            width: 40,
                           )),
                       IconButton(
                           padding: EdgeInsets.zero,
                           onPressed: () => signInWithGoogle(context),
                           icon: SvgPicture.asset(
-                            "assets/icons/2google_box.svg",
+                            "assets/icons/google_box.svg",
                             height: 64,
                             width: 64,
                           )

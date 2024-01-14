@@ -18,11 +18,15 @@
 		</data>
 		<key>Headers/FirebaseAppCheckInterop-umbrella.h</key>
 		<data>
-		XSqSyMgFh44sfjNtzxb7dosSbUI=
+		JtPIv5oxj17Yr+fnkFZEnQn/KgI=
+		</data>
+		<key>Headers/FirebaseAppCheckInterop.h</key>
+		<data>
+		4eBwqw6ARXvbgptPySByzgIzQ/k=
 		</data>
 		<key>Info.plist</key>
 		<data>
-		K2tqKzWyS4eDci0lcUqee6fbX7g=
+		8vcu9rJ+qQlHIE6xcLrQTrbQ53E=
 		</data>
 		<key>Modules/module.modulemap</key>
 		<data>
@@ -68,11 +72,22 @@
 		<dict>
 			<key>hash</key>
 			<data>
-			XSqSyMgFh44sfjNtzxb7dosSbUI=
+			JtPIv5oxj17Yr+fnkFZEnQn/KgI=
 			</data>
 			<key>hash2</key>
 			<data>
-			98se6HTdMIVVxLW6f5ueDgI87kAU0IZ+beZzToCY01A=
+			2qbA21frf+mmswWvnMh9zdhzYnCzEFHHs3KxCDQDA/E=
+			</data>
+		</dict>
+		<key>Headers/FirebaseAppCheckInterop.h</key>
+		<dict>
+			<key>hash</key>
+			<data>
+			4eBwqw6ARXvbgptPySByzgIzQ/k=
+			</data>
+			<key>hash2</key>
+			<data>
+			Vj9HfO3aYpmAZkBz1p1QC2YoPCy0C/IcHxBQXvcZfI4=
 			</data>
 		</dict>
 		<key>Modules/module.modulemap</key>

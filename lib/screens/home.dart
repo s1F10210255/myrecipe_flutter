@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:g14/screens/tab1.dart';
 import 'package:g14/screens/tab2.dart';
+import 'package:g14/screens/tab3.dart';
 import 'package:g14/screens/tab4.dart';
 import 'package:g14/screens/tab5.dart';
 import 'package:custom_navigation_bar/custom_navigation_bar.dart';
@@ -18,7 +19,7 @@ class _HomeScreenState extends State<HomeScreen> {
   final List<Widget> _pages = [
     Tab1(),  // 1つ目のタブの中身
     Tab2(),  // 2つ目のタブの中身
-    Center(child: Text('Tab 3')),  // 3つ目のタブの中身
+    Tab3(),  // 3つ目のタブの中身
     Tab4(),
     Tab5(),
   ];
@@ -32,15 +33,7 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        actions: [
-          if (_currentUser != null)
-            Padding(
-              padding: EdgeInsets.symmetric(horizontal: 8.0),
-              child: Center(child: Text(_currentUser!.email ?? '')),
-            ),
-        ],
-      ),
+      
       body: _pages[_currentIndex],  // 現在のタブインデックスに応じたページを表示
       bottomNavigationBar: CustomNavigationBar(
         currentIndex: _currentIndex,
@@ -57,13 +50,13 @@ class _HomeScreenState extends State<HomeScreen> {
             icon: Icon(Icons.search),
           ),
           CustomNavigationBarItem(
-            icon: Icon(Icons.person),
+            icon: Icon(Icons.three_p),
           ),
           CustomNavigationBarItem(
             icon: Icon(Icons.edit_calendar_outlined),
           ),
           CustomNavigationBarItem(
-            icon: Icon(Icons.attachment),
+            icon: Icon(Icons.manage_accounts),
           ),
         ],
         isFloating: true,  // <-- これを追加します

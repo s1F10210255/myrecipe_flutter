@@ -5,6 +5,8 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:hyper_effects/hyper_effects.dart';
 import 'package:g14/widget/videocard.dart' as video_card;
+import 'package:g14/widget/AdWidget_tab2.dart';
+
 
 
 class Tab2 extends StatefulWidget {
@@ -22,45 +24,65 @@ class _Tab2State extends State<Tab2> {
   Future<void> callAPI(String query) async {
     setState(() {
       _isLoading = true;
+      videoResult.clear(); // 前の検索結果をクリア
     });
 
+    // 最初にYouTube APIで動画を検索
     var searchResults = await youtube.search(query, order: 'relevance', videoDuration: 'any', regionCode: 'JP');
-
-    // 各動画のIDを取得
     List<String> videoIds = searchResults.map((video) => video.id).where((id) => id != null).cast<String>().toList();
-    // YouTube Data API v3を使用して各動画の詳細情報を取得
-    var videoDetailsResponse = await http.get(
-        Uri.parse('https://www.googleapis.com/youtube/v3/videos?part=snippet,contentDetails,statistics&id=${videoIds.join(',')}&key=${key}')
+
+    // 字幕の有無を確認するためにGoogle Cloud Functionを呼び出し
+    var captionsResponse = await http.post(
+      Uri.parse('https://asia-northeast1-dotted-crane-403823.cloudfunctions.net/youtube_subtitles'),
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+      },
+      body: json.encode({'video_ids': videoIds}),
     );
 
-    if (videoDetailsResponse.statusCode == 200) {
-      var videoDetailsData = json.decode(videoDetailsResponse.body);
-      List<video_card.YouTubeVideo> videosWithDetails = [];
+    if (captionsResponse.statusCode == 200) {
+      var captionsData = json.decode(captionsResponse.body);
+      var captions = captionsData['captions'] as Map<String, dynamic>;
+      // 字幕がある動画IDのリストを作成
+      var videoIdsWithCaptions = captions.entries.where((entry) => entry.value == true).map((entry) => entry.key).toList();
 
-      for (var videoData in videoDetailsData['items']) {
-        // 必要な情報を取り出し
-        var newVideo = video_card.YouTubeVideo(
-          id: videoData['id'],
-          title: videoData['snippet']['title'],
-          thumbnailUrl: videoData['snippet']['thumbnails']['high']['url'],
-          channelTitle: videoData['snippet']['channelTitle'],
-          viewCount: int.parse(videoData['statistics']['viewCount']),
-          publishedAt: DateTime.parse(videoData['snippet']['publishedAt']),
-        );
-        videosWithDetails.add(newVideo);
+      // 字幕がある動画のみの詳細情報を取得
+      var videoDetailsResponse = await http.get(
+          Uri.parse('https://www.googleapis.com/youtube/v3/videos?part=snippet,contentDetails,statistics&id=${videoIdsWithCaptions.join(',')}&key=${key}')
+      );
+
+      if (videoDetailsResponse.statusCode == 200) {
+        var videoDetailsData = json.decode(videoDetailsResponse.body);
+        List<video_card.YouTubeVideo> videosWithDetails = [];
+
+        for (var videoData in videoDetailsData['items']) {
+          var newVideo = video_card.YouTubeVideo(
+            id: videoData['id'],
+            title: videoData['snippet']['title'],
+            thumbnailUrl: videoData['snippet']['thumbnails']['high']['url'],
+            channelTitle: videoData['snippet']['channelTitle'],
+            viewCount: int.parse(videoData['statistics']['viewCount']),
+            publishedAt: DateTime.parse(videoData['snippet']['publishedAt']),
+          );
+          videosWithDetails.add(newVideo);
+        }
+
+        setState(() {
+          videoResult = videosWithDetails;
+          _isLoading = false;
+        });
+      } else {
+        setState(() {
+          _isLoading = false;
+        });
       }
-
-      setState(() {
-        videoResult = videosWithDetails;
-        _isLoading = false;
-      });
     } else {
-      // エラー処理
       setState(() {
         _isLoading = false;
       });
     }
   }
+
 
 
 
@@ -89,6 +111,7 @@ class _Tab2State extends State<Tab2> {
       children: [
         Column(
           children: [
+            const SizedBox(height: 50),
             Padding(
               padding: const EdgeInsets.all(8.0),
               child: TextField(
@@ -128,7 +151,9 @@ class _Tab2State extends State<Tab2> {
                 },
               ),
             ),
+            BannerAdWidget(),
           ],
+
         ),
         _isLoading
             ? Center(child: Image.asset('assets/gif/road.gif'))
