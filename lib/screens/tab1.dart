@@ -8,7 +8,7 @@ import 'package:g14/screens/AllVideosScreen.dart';
 import 'package:g14/screens/tab1-1.dart';
 import 'package:g14/screens/tab1-2.dart';
 import 'package:g14/screens/tab1-3.dart';
-
+import 'package:g14/widget/ImageSlider.dart';
 
 
 class Tab1 extends StatefulWidget {
@@ -42,6 +42,7 @@ class _Tab1State extends State<Tab1> {
     "assets/images/man.png",
   ];
 
+
   Future<List<String>> fetchVideoIds(String category) async {
     final firestoreInstance = FirebaseFirestore.instance;
     String? field = categoryMap[category];
@@ -60,6 +61,8 @@ class _Tab1State extends State<Tab1> {
       throw 'Document "youtube_videos" not found';
     }
   }
+
+
 
   Widget buildVideoList(List<String> videoIds) {
     return Container(
@@ -150,30 +153,17 @@ class _Tab1State extends State<Tab1> {
                 children: [
                   const HomeAppbar(),
                   const SizedBox(height: 20),
-                  GestureDetector(
-                    onTap: () {
-                      if (_currentPage == 0) {
+                  ImageSlider(
+                    imageList: imageList,
+                    onTapImage: (index) {
+                      if (index == 0) {
                         Navigator.push(context, MaterialPageRoute(builder: (context) => HowToPage()));
-                      } else if (_currentPage == 1) {
+                      } else if (index == 1) {
                         Navigator.push(context, MaterialPageRoute(builder: (context) => HowToPage2()));
-                      } else if (_currentPage == 2) {
+                      } else if (index == 2) {
                         Navigator.push(context, MaterialPageRoute(builder: (context) => HowToPage3()));
                       }
                     },
-                    child: Container(
-                      width: double.infinity,
-                      height: 170,
-                      child: PageView.builder(
-                        controller: _pageController,
-                        itemCount: imageList.length,
-                        itemBuilder: (context, index) {
-                          return ClipRRect(
-                            borderRadius: BorderRadius.circular(15),
-                            child: Image.asset(imageList[index], fit: BoxFit.cover),
-                          );
-                        },
-                      ),
-                    ),
                   ),
                     const SizedBox(height: 20),
                     const Text(

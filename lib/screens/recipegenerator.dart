@@ -8,6 +8,9 @@ import 'package:fan_floating_menu/fan_floating_menu.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
 import 'package:g14/widget/AdWidget.dart';
+import 'package:g14/widget/rivePop.dart';
+import 'package:flutter_speed_dial/flutter_speed_dial.dart';
+
 
 
 class RecipeGenerator extends StatefulWidget {
@@ -135,6 +138,7 @@ class _RecipeGeneratorState extends State<RecipeGenerator> {
   }
 
 
+
   Future<void> _interactWithChatGPT(String userId, String videoId,
       String userQuestion) async {
     setState(() {
@@ -166,6 +170,23 @@ class _RecipeGeneratorState extends State<RecipeGenerator> {
     });
   }
 
+  void _showRiveAnimation(BuildContext context, String assetName) {
+    showDialog(
+      context: context,
+      builder: (_) => Dialog(
+        backgroundColor: Colors.transparent,
+        child: RiveAnimationWidget(assetName: assetName),
+      ),
+    );
+
+    // 1.5秒後にダイアログを閉じる
+    Future.delayed(Duration(milliseconds: 1500), () {
+      Navigator.of(context).pop(); // ダイアログを閉じる
+    });
+  }
+
+
+
   @override
   Widget build(BuildContext context) {
     return YoutubePlayerBuilder(
@@ -196,10 +217,17 @@ class _RecipeGeneratorState extends State<RecipeGenerator> {
                 _isLoading
                     ? Expanded(
                     child: Center(child: CircularProgressIndicator()))
-                    : Expanded(
-                    child: SingleChildScrollView(child: Text(_responseText))),
-
-
+                    :Expanded(
+                  child: Visibility(
+                    visible: !_isMenuOpen, // メニューが開いていない時だけテキストを表示
+                    child: SingleChildScrollView(
+                      child: Text(
+                        _responseText,
+                        style: TextStyle(color: _isMenuOpen ? Colors.white : Colors.black),
+                      ),
+                    ),
+                  ),
+                ),
 
                 Padding( // 追加: Rowの上に余白を追加するためのPadding
                   padding: EdgeInsets.only(bottom: 40.0),
@@ -207,7 +235,7 @@ class _RecipeGeneratorState extends State<RecipeGenerator> {
                     mainAxisAlignment: MainAxisAlignment.end,
                     children: [
                       Container(
-                        width: MediaQuery.of(context).size.width * 0.8,
+                        width: MediaQuery.of(context).size.width * 0.79,
                         padding: EdgeInsets.symmetric(horizontal: 20),
                         child: TextField(
                           controller: _questionController,
@@ -239,41 +267,69 @@ class _RecipeGeneratorState extends State<RecipeGenerator> {
             ),
           ),
 
-          // FanFloatingMenu を追加
-          floatingActionButton: Padding(
-            padding: EdgeInsets.only(left: 20), // 右に余白を追加
-            child: FanFloatingMenu(
-              menuItems: [
-                FanMenuItem(
-                  onTap: () {
-                    String? userId = getCurrentUserUID();
-                    if (userId != null) {
-                      likeVideo(userId, widget.videoId);
-                    }
-                  },
-                  icon: Icons.favorite, // いいねアイコンに変更
-                  title: 'いいねする',
+
+          floatingActionButton: SpeedDial(
+            child: Icon(
+              Icons.add,
+              size: 35, // アイコンのサイズを指定
+            ),
+            buttonSize: Size(65, 65),
+            activeIcon: Icons.close, // メニューを閉じるためのアイコン
+            backgroundColor: Colors.green,
+            foregroundColor: Colors.white,
+            switchLabelPosition: true,
+            children: [
+              SpeedDialChild(
+                child: Icon(
+                  Icons.favorite,
+                  color: Colors.pink,
+                  size: 30, // アイコンのサイズを指定
                 ),
-                FanMenuItem(
-                  onTap: () {
-                    String? userId = getCurrentUserUID();
-                    if (userId != null) {
-                      saveVideoToCalendar(userId, widget.videoId);
-                    }
-                  },
-                  icon: Icons.calendar_today, // カレンダーアイコンに変更
-                  title: 'カレンダーに保存',
+                backgroundColor: Colors.white,
+
+                labelStyle: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
                 ),
 
-              ],
-              fanMenuDirection: FanMenuDirection.ltr,
-              expandItemsCurve: Curves.easeInOutBack,
-              toggleButtonWidget: null,
-              toggleButtonIconColor: Colors.white,
-              toggleButtonColor: Colors.green,
-            ),
+                label: 'いいねする',
+                onTap: () {
+                  String? userId = getCurrentUserUID();
+                  if (userId != null) {
+                    likeVideo(userId, widget.videoId);
+                    _showRiveAnimation(context, 'assets/RiveAssets/twitter_like_button1.riv');
+                  }
+                },
+              ),
+
+              SpeedDialChild(
+                child: Icon(
+                  Icons.calendar_month_outlined,
+                  color: Colors.blue,
+                  size: 30, // アイコンのサイズを指定
+                ),
+                backgroundColor: Colors.white,
+
+                labelStyle: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
+
+                label: 'カレンダーに保存',
+                onTap: () {
+                  String? userId = getCurrentUserUID();
+                  if (userId != null) {
+                    saveVideoToCalendar(userId, widget.videoId);
+                    _showRiveAnimation(context, 'assets/RiveAssets/checkmark.riv');
+                  }
+                },
+              ),
+
+            ],
+
           ),
-          floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
+          floatingActionButtonLocation: FloatingActionButtonLocation.startFloat,
+
         );
       },
     );

@@ -10,11 +10,11 @@
 		</data>
 		<key>flutter_assets/AssetManifest.bin</key>
 		<data>
-		osWuySbDSw9wsEs6ZshM1nqPZBo=
+		91dF3p7vpmnPqZTJ7dGzeixEgyo=
 		</data>
 		<key>flutter_assets/AssetManifest.json</key>
 		<data>
-		NtMb5CWMMirwk5XUQQE1QQWaCb4=
+		3V5ulb5IrfImwPSFHKr8mHVfdhU=
 		</data>
 		<key>flutter_assets/FontManifest.json</key>
 		<data>
@@ -22,7 +22,7 @@
 		</data>
 		<key>flutter_assets/NOTICES.Z</key>
 		<data>
-		nHGs+ZT+pn2jlTN8iW1lIVoiY6w=
+		TmmNKsBRYWOcpDGoNnJZy9UdWuM=
 		</data>
 		<key>flutter_assets/assets/Backgrounds/Spline.png</key>
 		<data>
@@ -84,6 +84,10 @@
 		<data>
 		k1ZZmPi8+Quew33D+i5hKgNoO/4=
 		</data>
+		<key>flutter_assets/assets/RiveAssets/checkmark.riv</key>
+		<data>
+		MFMn8NseccrcXlPIEV0jXhe6pHA=
+		</data>
 		<key>flutter_assets/assets/RiveAssets/chef.riv</key>
 		<data>
 		oEbAbyROeqeWUI+MJvm+Hdc3iHE=
@@ -111,6 +115,14 @@
 		<key>flutter_assets/assets/RiveAssets/shapes.riv</key>
 		<data>
 		5tn1pHOHJ6Oseh1WOMlYnRzNSUo=
+		</data>
+		<key>flutter_assets/assets/RiveAssets/twitter_like_button.riv</key>
+		<data>
+		rpvpizxJD6Ah+CM3NglQc6HFXSo=
+		</data>
+		<key>flutter_assets/assets/RiveAssets/twitter_like_button1.riv</key>
+		<data>
+		k01Xn9N0mneLisOCE+4VjCnkxFk=
 		</data>
 		<key>flutter_assets/assets/avaters/Avatar%201.jpg</key>
 		<data>
@@ -270,7 +282,7 @@
 		</data>
 		<key>flutter_assets/fonts/MaterialIcons-Regular.otf</key>
 		<data>
-		Ss/ARuWYueqHpCWbdwTrvyadpzY=
+		NEZP+IbD7kB2rdUDIlpnMQQGFgA=
 		</data>
 		<key>flutter_assets/packages/cupertino_icons/assets/CupertinoIcons.ttf</key>
 		<data>
@@ -315,14 +327,14 @@
 		<dict>
 			<key>hash2</key>
 			<data>
-			Fd47lJqqWRAgMvbjgjiQ2keY1dSKHoRYDJuKtiLQuOQ=
+			bv6TgschzScUJ9fYn9KeeThr6Gq+GblpFweRFHba22Q=
 			</data>
 		</dict>
 		<key>flutter_assets/AssetManifest.json</key>
 		<dict>
 			<key>hash2</key>
 			<data>
-			FYB9n8mwpMaTZ0wAi/WG6LiIeGYxE3URqzyqIhfeLcs=
+			+6YDTQK+CrzsSHM6K2oV6/oBwzwck5bgOIfGs0dN14o=
 			</data>
 		</dict>
 		<key>flutter_assets/FontManifest.json</key>
@@ -336,7 +348,7 @@
 		<dict>
 			<key>hash2</key>
 			<data>
-			PMAxvmbstTikDjFf2gU4ahmeU0AzSWSgXq8TbSL0h/o=
+			hB8NdJzGfP7d3d6p6IapJ6qxjgJGRsZKs3+OVDrTvkE=
 			</data>
 		</dict>
 		<key>flutter_assets/assets/Backgrounds/Spline.png</key>
@@ -437,6 +449,13 @@
 			E5fha5N4mju9xoONj+2LL4mw/GsQWyQy1TmeVmXI8T8=
 			</data>
 		</dict>
+		<key>flutter_assets/assets/RiveAssets/checkmark.riv</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			CLDyCrRayImPrcaQPVA7rFHCX/yc80i7yDz8qk94ALs=
+			</data>
+		</dict>
 		<key>flutter_assets/assets/RiveAssets/chef.riv</key>
 		<dict>
 			<key>hash2</key>
@@ -484,6 +503,20 @@
 			<key>hash2</key>
 			<data>
 			6U/BEU+F1qdRUcZWNfbivasC5UwiFv+tmaTuwlWineM=
+			</data>
+		</dict>
+		<key>flutter_assets/assets/RiveAssets/twitter_like_button.riv</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			zl9kB86E3pSUjs8Tbe7rn/e3CcZMd7I2yB9nhDMSITk=
+			</data>
+		</dict>
+		<key>flutter_assets/assets/RiveAssets/twitter_like_button1.riv</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			VKBzxkZ4XLnHe9tsUrHLRDEl3NWPWL8NkU/MOG/EVzs=
 			</data>
 		</dict>
 		<key>flutter_assets/assets/avaters/Avatar%201.jpg</key>
@@ -749,7 +782,7 @@
 		<dict>
 			<key>hash2</key>
 			<data>
-			ixWmI3BWRmZe4jWqX6VmFa19NWYx57TuUVzmeQEW9AQ=
+			hjm+UBzIbEmAIxBSFxCJiPrVtABRwJ5X7Opfr44AaL4=
 			</data>
 		</dict>
 		<key>flutter_assets/packages/cupertino_icons/assets/CupertinoIcons.ttf</key>

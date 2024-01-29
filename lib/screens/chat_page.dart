@@ -29,6 +29,9 @@ class _CharacterChatPageState extends State<CharacterChatPage> {
 
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
+  bool _isLoading = false;
+
+
   String? getCurrentUserUID() {
     return _auth.currentUser?.uid;
   }
@@ -46,12 +49,16 @@ class _CharacterChatPageState extends State<CharacterChatPage> {
 
   Future<void> _sendMessage(String text) async {
     final String endpoint = 'https://api.openai.iniad.org/api/v1/chat/completions';
-    final String apiKey = 'UeOuO6C3PXFbiJDxM68LpE94iE9R3SuoFCQtmimdM9_wd8S-FAwRlAKzjNqNvWneji161chF5LpBDI7GtHZS2YQ';
+    final String apiKey = 'hWiSFsRT2ctgrafvYEyQxHFEq0x3wKdE2fwCm_vExpMK0jxt55rLwFqeC63s4bZ5kV4y6hqMYwP07ExorqQ-4Yw';
 
     final headers = {
       'Authorization': 'Bearer $apiKey',
       'Content-Type': 'application/json',
     };
+
+    setState(() {
+      _isLoading = true; // ローディング開始
+    });
 
     String characterContext = _getCharacterContext(widget.characterName);
 
@@ -66,6 +73,9 @@ class _CharacterChatPageState extends State<CharacterChatPage> {
     final response = await http.post(Uri.parse(endpoint), headers: headers, body: body);
 
     if (response.statusCode == 200) {
+      setState(() {
+        _isLoading = false; // ローディング終了
+      });
       final Map<String, dynamic> data = jsonDecode(utf8.decode(response.bodyBytes));
       final String reply = data['choices'][0]['message']['content'].trim();
       setState(() {
@@ -92,15 +102,15 @@ class _CharacterChatPageState extends State<CharacterChatPage> {
   String _getCharacterContext(String characterName) {
     switch (characterName) {
       case "AI 栄養士":
-        return 'あなたはAI栄養士です。栄養に関するアドバイスを提供してください。';
+        return 'あなたはAI栄養士です。栄養に関するアドバイスを提供してください。聞かれた質問に対しては常に栄養価の観点を考慮して健康的な食生活になるようにアドバイスしてください。また、アドバイスに加えて具体的な献立を提供してください。';
       case "ボディービルダー":
-        return 'あなたはマッチです。筋肉王を目指しています。';
+        return 'あなたはマッチです。筋肉王を目指しています。筋肉の作り方、ダイエット方法などに詳しいです。プロテインが好きです。なりきってください';
       case "坂本龍馬":
-        return 'あなたは坂本龍馬です。なりきって答えて下さい。よくわからないことを聞かれても予想して書いて下さい。';
+        return 'あなたは日本の歴史上の偉人、坂本龍馬です。江戸時代の視点から、坂本龍馬の知識と経験に基づいて答えてください。質問に対する回答は、まるで坂本龍馬自身が話しているかのように表現してください。常に過去の時代の視点と知識を用いてください。';
       case "マリー・アントワネット":
-        return 'あなたはマリー・アントワネットです。フランス革命の時代の女王です。';
+        return 'あなたはマリーアントワネット、フランス革命前夜のフランス王妃です。オーストリアの皇女として生まれ、若くしてルイ16世の妃となりました。あなたの生活は華やかさと贅沢に満ちており、とにかく贅沢で常に高級な食べ物や物品を使っていました。';
       case "陽気なインド人":
-        return 'あなたは陽気なインド人です。インド文化について話してください。';
+        return 'あなたは陽気なインド人です。インド文化について話してください。食生活について問われたらインド由来の食べ物に関して答えてください。また、口調は陽気なイメージとなるようにラフに答えてください。また、インド人なのでカタコトな日本語を表現するためにたまにカタカナを使用してください。';
       default:
         return 'あなたはアシスタントです。';
     }
@@ -187,10 +197,17 @@ class _CharacterChatPageState extends State<CharacterChatPage> {
 
     print('Sending request with body: $body');
 
+    setState(() {
+      _isLoading = true; // ローディング開始
+    });
+
     final response = await http.post(Uri.parse(endpoint), headers: headers, body: body);
 
     if (response.statusCode == 200) {
       print('Data sent successfully');
+      setState(() {
+        _isLoading = false; // ローディング終了
+      });
 
       // 応答データの解析
       final responseData = jsonDecode(response.body);
@@ -226,7 +243,6 @@ class _CharacterChatPageState extends State<CharacterChatPage> {
 
 
 
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -239,55 +255,60 @@ class _CharacterChatPageState extends State<CharacterChatPage> {
           ),
         ],
       ),
-      body: Column(
+      body: Stack(
         children: [
-          Expanded(
-            child: ChatList(
-              chatController: _chatController,
-            ),
-          ),
-          Container(
-            padding: EdgeInsets.all(10),
-            child: Row(
-              children: [
-                // CircleAvatarの周りに余白を追加
-                Padding(
-                  padding: const EdgeInsets.all(8.0), // ここで余白を調整します
-                  child: CircleAvatar(
-                    radius: 40, // ここで半径を調整します
-                    backgroundImage: AssetImage(widget.avatarUrl),
-                  ),
+          Column(
+            children: [
+              Expanded(
+                child: ChatList(
+                  chatController: _chatController,
                 ),
-                SizedBox(width: 8),
-                Expanded(
-                  child: TextField(
-                    controller: _controller,
-                    decoration: InputDecoration(
-                      hintText: 'メッセージを入力',
-                      border: OutlineInputBorder(),
-                      suffixIcon: IconButton(
-                        icon: Icon(Icons.send),
-                        onPressed: () {
-                          if (_controller.text.isNotEmpty) {
-                            _sendMessage(_controller.text);
+              ),
+              Container(
+                padding: EdgeInsets.all(10),
+                child: Row(
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: CircleAvatar(
+                        radius: 40,
+                        backgroundImage: AssetImage(widget.avatarUrl),
+                      ),
+                    ),
+                    SizedBox(width: 8),
+                    Expanded(
+                      child: TextField(
+                        controller: _controller,
+                        decoration: InputDecoration(
+                          hintText: 'メッセージを入力',
+                          border: OutlineInputBorder(),
+                          suffixIcon: IconButton(
+                            icon: Icon(Icons.send),
+                            onPressed: () {
+                              if (_controller.text.isNotEmpty) {
+                                _sendMessage(_controller.text);
+                                _controller.clear();
+                              }
+                            },
+                          ),
+                        ),
+                        onSubmitted: (text) {
+                          if (text.isNotEmpty) {
+                            _sendMessage(text);
                             _controller.clear();
                           }
                         },
                       ),
                     ),
-                    onSubmitted: (text) {
-                      if (text.isNotEmpty) {
-                        _sendMessage(text);
-                        _controller.clear();
-                      }
-                    },
-                  ),
+                  ],
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
+          _isLoading ? Center(child: CircularProgressIndicator()) : Container(),
         ],
       ),
     );
   }
 }
+
