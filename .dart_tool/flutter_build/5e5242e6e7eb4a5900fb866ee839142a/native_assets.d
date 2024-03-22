@@ -1,1 +1,0 @@
- /Users/iniad/AndroidStudioProjects/myrecipe_flutter/.dart_tool/flutter_build/5e5242e6e7eb4a5900fb866ee839142a/native_assets.yaml: 
