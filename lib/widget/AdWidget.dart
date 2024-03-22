@@ -23,7 +23,7 @@ class _AdInterstitialWidgetState extends State<AdInterstitialWidget> {
 
   void _loadAd() {
     InterstitialAd.load(
-      adUnitId: 'ca-app-pub-3940256099942544/4411468910', // テスト用広告ユニットID
+      adUnitId: 'ca-app-pub-1327127606116802/2939016691', // テスト用広告ユニットID
       request: AdRequest(),
       adLoadCallback: InterstitialAdLoadCallback(
         onAdLoaded: (InterstitialAd ad) {

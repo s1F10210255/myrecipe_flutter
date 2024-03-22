@@ -6,6 +6,7 @@ import 'dart:convert';
 import 'package:hyper_effects/hyper_effects.dart';
 import 'package:g14/widget/videocard.dart' as video_card;
 import 'package:g14/widget/AdWidget_tab2.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 
 
@@ -15,8 +16,8 @@ class Tab2 extends StatefulWidget {
 }
 
 class _Tab2State extends State<Tab2> {
-  static const String key = "AIzaSyAd6OIW60UHOBRO_10VhujI6FujyBQsTB4"; // 実験用のAPIキー
-  YoutubeAPI youtube = YoutubeAPI(key, maxResults: 20, type: 'video');
+  static String? key = dotenv.env['YOUTUBE_API_KEY'];
+  YoutubeAPI youtube = YoutubeAPI(key!, maxResults: 20, type: 'video');
   List<video_card.YouTubeVideo> videoResult = [];
   bool _isLoading = false;
   TextEditingController searchController = TextEditingController();
@@ -48,8 +49,9 @@ class _Tab2State extends State<Tab2> {
 
       // 字幕がある動画のみの詳細情報を取得
       var videoDetailsResponse = await http.get(
-          Uri.parse('https://www.googleapis.com/youtube/v3/videos?part=snippet,contentDetails,statistics&id=${videoIdsWithCaptions.join(',')}&key=${key}')
+          Uri.parse('https://www.googleapis.com/youtube/v3/videos?part=snippet,contentDetails,statistics&id=${videoIdsWithCaptions.join(',')}&key=${key!}')
       );
+
 
       if (videoDetailsResponse.statusCode == 200) {
         var videoDetailsData = json.decode(videoDetailsResponse.body);

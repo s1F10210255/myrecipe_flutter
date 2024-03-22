@@ -6,6 +6,10 @@ import 'package:g14/screens/onboding/onboding_screen.dart';
 import 'package:go_router/go_router.dart';
 import 'package:g14/screens/home.dart';
 import 'package:g14/screens/onboding/components/sign_up_form.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:flutter/services.dart';
+
+
 
 
 final goRouter = GoRouter(
@@ -42,9 +46,15 @@ class MyApp extends StatelessWidget {
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await dotenv.load(fileName: ".env");
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
+
+  await SystemChrome.setPreferredOrientations([
+    DeviceOrientation.portraitUp,
+    DeviceOrientation.portraitDown,
+  ]);
 
 
 

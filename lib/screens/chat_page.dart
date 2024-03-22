@@ -8,6 +8,8 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+
 
 
 class CharacterChatPage extends StatefulWidget {
@@ -49,7 +51,7 @@ class _CharacterChatPageState extends State<CharacterChatPage> {
 
   Future<void> _sendMessage(String text) async {
     final String endpoint = 'https://api.openai.iniad.org/api/v1/chat/completions';
-    final String apiKey = 'hWiSFsRT2ctgrafvYEyQxHFEq0x3wKdE2fwCm_vExpMK0jxt55rLwFqeC63s4bZ5kV4y6hqMYwP07ExorqQ-4Yw';
+    final String apiKey =  dotenv.env['CHAT_API_KEY'] ?? '';
 
     final headers = {
       'Authorization': 'Bearer $apiKey',

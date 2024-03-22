@@ -5,7 +5,6 @@ import 'package:g14/screens/onboding/components/sign_in_form.dart';
 import 'package:g14/servise/service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
-import 'package:g14/screens/onboding/components/twitter_sign_in.dart';
 import 'package:twitter_login/twitter_login.dart';
 
 
@@ -21,34 +20,7 @@ void signInWithGoogle(BuildContext context) async {
 }
 
 
-Future<void> signInWithTwitter(BuildContext context) async {
-  final twitterLogin = TwitterLogin(
-    apiKey: 'C0I0iyFdxAR59FXxKQGUKPIkC',
-    apiSecretKey: 'G5chGLxkt4wv8kbPC4HonMMx51A9FUlwwOfe7YnzhD7mqCCMNU',
-    redirectURI: 'https://chatgptrecipegenerator.firebaseapp.com/__/auth/handler',
-  );
 
-  final authResult = await twitterLogin.login();
-
-  switch (authResult.status) {
-    case TwitterLoginStatus.loggedIn:
-    // ユーザーが正常にログインした場合の処理
-      print('Logged in! Username: ${authResult.user!.email}');
-      break;
-    case TwitterLoginStatus.cancelledByUser:
-    // ユーザーがログインをキャンセルした場合の処理
-      print('Login cancelled by user.');
-      break;
-    case TwitterLoginStatus.error:
-    // エラーが発生した場合の処理
-      print('Login error: ${authResult.errorMessage}');
-      break;
-    default:
-    // その他のケース
-      break;
-
-  }
-}
 
 
 
@@ -123,19 +95,7 @@ Future<Object?> customSigninDialog(BuildContext context,
                             height: 64,
                             width: 64,
                           )),
-                      IconButton(
-                          padding: EdgeInsets.zero,
 
-                          onPressed: () {
-                            print('Twitter login button tapped'); // ボタンタップのデバッグ情報
-                            signInWithTwitter(context);
-                          },
-
-                          icon: SvgPicture.asset(
-                            "assets/icons/X_logo_2023.svg",
-                            height: 40,
-                            width: 40,
-                          )),
                       IconButton(
                           padding: EdgeInsets.zero,
                           onPressed: () => signInWithGoogle(context),

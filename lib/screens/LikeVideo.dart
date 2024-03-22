@@ -6,6 +6,8 @@ import 'dart:convert';
 import 'package:intl/intl.dart'; // intl パッケージをインポート
 import 'package:g14/widget/videocard_ver2.dart' as video_card;
 import 'package:g14/screens/recipegenerator.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+
 
 class LikedVideosPage extends StatefulWidget {
   @override
@@ -43,7 +45,14 @@ class _LikedVideosPageState extends State<LikedVideosPage> {
   }
 
   Future<Map<String, dynamic>> _fetchVideoDetails(String videoId) async {
-    final String apiKey = 'AIzaSyA8OXpQMoeDgbb7nkwX4mDpjeCh4UmQkOQ';
+    final String apiKey = dotenv.env['YOUTUBE_API_KEY'] ?? '';  // .envからAPIキーを取得
+
+    // APIキーが空の場合のエラーチェック
+    if (apiKey.isEmpty) {
+      print('API key is not found in .env file.');
+      return {};
+    }
+
     final String apiUrl = 'https://www.googleapis.com/youtube/v3/videos?part=snippet,contentDetails,statistics&id=$videoId&key=$apiKey';
     final response = await http.get(Uri.parse(apiUrl));
 
@@ -61,6 +70,7 @@ class _LikedVideosPageState extends State<LikedVideosPage> {
       throw Exception('Failed to load video details');
     }
   }
+
 
 
   @override

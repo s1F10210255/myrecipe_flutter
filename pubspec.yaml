@@ -9,6 +9,7 @@ environment:
   sdk: '>=3.1.2 <4.0.0'
 
 dependencies:
+  flutter_dotenv: ^5.1.0
   flutter_speed_dial: ^7.0.0
   google_mobile_ads: ^4.0.0
   flutter_launcher_icons: ^0.13.1
@@ -69,6 +70,7 @@ dev_dependencies:
 
 flutter:
   assets:
+    - .env
     - assets/avaters/
     - assets/Backgrounds/
     - assets/icons/
